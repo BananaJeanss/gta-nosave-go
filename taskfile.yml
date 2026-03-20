@@ -1,10 +1,11 @@
-version: '3'
+version: "3"
 
 tasks:
   build:
     silent: true
     cmds:
-      - go build -ldflags="-H windowsgui" -o gta-nosave.exe main.go
+      - rsrc -ico icon.ico -manifest main.manifest -o rsrc.syso
+      - go build -ldflags="-H windowsgui" -o gta-nosave.exe .
   runAsAdmin:
     silent: true
     cmds:

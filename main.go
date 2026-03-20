@@ -24,25 +24,25 @@ var isEnabled bool = false
 var currentOverlay atomic.Uintptr
 
 var (
-	user32                    = syscall.NewLazyDLL("user32.dll")
-	getAsyncKeyState          = user32.NewProc("GetAsyncKeyState")
-	createWindowExW           = user32.NewProc("CreateWindowExW")
-	destroyWindow             = user32.NewProc("DestroyWindow")
-	getMessageW               = user32.NewProc("GetMessageW")
-	translateMessage          = user32.NewProc("TranslateMessage")
-	dispatchMessageW          = user32.NewProc("DispatchMessageW")
-	postMessageW              = user32.NewProc("PostMessageW")
-	registerClassExW          = user32.NewProc("RegisterClassExW")
-	defWindowProcW            = user32.NewProc("DefWindowProcW")
-	beginPaint                = user32.NewProc("BeginPaint")
-	endPaint                  = user32.NewProc("EndPaint")
-	getClientRect             = user32.NewProc("GetClientRect")
-	fillRect                  = user32.NewProc("FillRect")
-	drawTextW                 = user32.NewProc("DrawTextW")
+	user32                     = syscall.NewLazyDLL("user32.dll")
+	getAsyncKeyState           = user32.NewProc("GetAsyncKeyState")
+	createWindowExW            = user32.NewProc("CreateWindowExW")
+	destroyWindow              = user32.NewProc("DestroyWindow")
+	getMessageW                = user32.NewProc("GetMessageW")
+	translateMessage           = user32.NewProc("TranslateMessage")
+	dispatchMessageW           = user32.NewProc("DispatchMessageW")
+	postMessageW               = user32.NewProc("PostMessageW")
+	registerClassExW           = user32.NewProc("RegisterClassExW")
+	defWindowProcW             = user32.NewProc("DefWindowProcW")
+	beginPaint                 = user32.NewProc("BeginPaint")
+	endPaint                   = user32.NewProc("EndPaint")
+	getClientRect              = user32.NewProc("GetClientRect")
+	fillRect                   = user32.NewProc("FillRect")
+	drawTextW                  = user32.NewProc("DrawTextW")
 	setLayeredWindowAttributes = user32.NewProc("SetLayeredWindowAttributes")
 
-	kernel32          = syscall.NewLazyDLL("kernel32.dll")
-	getModuleHandleW  = kernel32.NewProc("GetModuleHandleW")
+	kernel32         = syscall.NewLazyDLL("kernel32.dll")
+	getModuleHandleW = kernel32.NewProc("GetModuleHandleW")
 
 	gdi32            = syscall.NewLazyDLL("gdi32.dll")
 	createFontW      = gdi32.NewProc("CreateFontW")
@@ -110,11 +110,11 @@ const (
 )
 
 var (
-	overlayText        string
-	overlayFont        uintptr
-	overlayClsName     *uint16
+	overlayText         string
+	overlayFont         uintptr
+	overlayClsName      *uint16
 	overlayRegisterOnce sync.Once
-	overlayWndProcPtr  uintptr
+	overlayWndProcPtr   uintptr
 )
 
 func overlayWndProc(hwnd, msg, wParam, lParam uintptr) uintptr {
@@ -274,6 +274,18 @@ func runHidden(name string, args ...string) error {
 	return cmd.Run()
 }
 
+var singleInstanceMutex windows.Handle
+
+func checkSingleInstance() {
+    name, _ := windows.UTF16PtrFromString("Global\\GTANosave")
+    mu, err := windows.CreateMutex(nil, false, name)
+    if err != nil || windows.GetLastError() == windows.ERROR_ALREADY_EXISTS {
+        createWinMessageBoxW("Error", "Another instance is already running.")
+        os.Exit(1)
+    }
+    singleInstanceMutex = mu
+}
+
 func enableFirewallRule() error {
 	return runHidden("netsh", "advfirewall", "firewall", "add", "rule", "name=GTANosave", "dir=out", "action=block", "remoteip="+RockstarIP)
 }
@@ -289,6 +301,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	// single instance check
+	checkSingleInstance()
+
+	// ready to go
+	// cleanup just in case
+	disableFirewallRule()
 	systray.Run(onReady, onExit)
 }
 

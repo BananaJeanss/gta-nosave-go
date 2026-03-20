@@ -1,0 +1,11 @@
+version: '3'
+
+tasks:
+  build:
+    silent: true
+    cmds:
+      - go build -ldflags="-H windowsgui" -o gta-nosave.exe main.go
+  runAsAdmin:
+    silent: true
+    cmds:
+      - powershell -Command "Start-Process 'gta-nosave.exe' -Verb runAs"

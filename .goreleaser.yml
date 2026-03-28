@@ -12,8 +12,8 @@ builds:
       - -trimpath
 
 archives:
-  - formats: [zip]
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Amd64 }}"
+  - formats: [binary]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_windows_amd64"
 
 release:
   github:

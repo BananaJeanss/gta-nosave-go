@@ -1,5 +1,10 @@
 version: 2
 
+before:
+  hooks:
+    - go install github.com/akavel/rsrc@latest
+    - rsrc -ico icon.ico -manifest main.manifest -o rsrc.syso
+
 builds:
   - goos:
       - windows

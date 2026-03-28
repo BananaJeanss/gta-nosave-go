@@ -1,0 +1,21 @@
+version: 2
+
+builds:
+  - goos:
+      - windows
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w
+      - -H windowsgui
+    flags:
+      - -trimpath
+
+archives:
+  - formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Amd64 }}"
+
+release:
+  github:
+    owner: BananaJeanss
+    name: gta-nosave-go
